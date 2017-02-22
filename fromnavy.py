@@ -15,6 +15,20 @@ def gethtml(url):
     html = response.read().decode()
     return html
 
+def jdcat(prod):
+    url='http://search.jd.com/Search?keyword='+prod+'&enc=utf-8'
+    html = gethtml(url);
+    parser = MyHTMLParser()
+    parser.feed(html)
+    content = parser.getContent()
+    pt = re.compile('<meta name="description"(.*?)/><script>',re.S)
+    parser2 = MyHTMLParser()
+    match = pt.search(html)
+    if(match):
+        parser2.feed(match.group(1))
+    return(parser2.getContent())
+
+
 # html 是整个页面的字符串，可以用各种方式解析
 
 class MyHTMLParser(HTMLParser):
@@ -70,7 +84,7 @@ parser = MyHTMLParser()
 parser.feed(html)
 content = parser.getContent()
 
-pt = re.compile('<ul class="J_valueList v-fixed">(.*?)</ul>',re.S)
+pt = re.compile('<meta name="description"(.*?)/><script>',re.S)
 parser2 = MyHTMLParser()
 match = pt.search(html)
 if(match):
@@ -78,3 +92,11 @@ if(match):
 
 title = ' '.join(parser2.getContent().split('\n'))
 title
+
+###################################################################
+
+products = ['psp2000','headandshoulder','iphone7plus','haifeisi','macbook']
+for producti in products:
+    print(producti)
+    print(jdcat(producti))
+
