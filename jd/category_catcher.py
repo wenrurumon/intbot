@@ -64,40 +64,50 @@ def jdcat_loop(prod,loopmax=3):
     if(match):
         parser2.feed(match.group(1))
     rlt = parser2.getContent()
+    if(len(rlt)>0):
+        return(rlt)
     #keep tracking similar product
-    while((len(rlt)==0)&(loopi<=loopmax)):
-        loopi = loopi+1
-        print('loop++')
-        pt2 = re.compile('<font class="skcolor_ljg">(.*?)</font>')
-        match2 = pt2.findall(html)
-        if(len(match2)==0):
-            return(rlt)
-        match2_counter = Counter(match2)
-        match2_set = list(set(match2))
-        match2_count = []
-        for seti in match2_set:
-            match2_count.append(match2_counter[seti]/len(match2))
-        match2_cumsum = sorted(match2_count,reverse=True)
+    print('track similar product')
+    pt2 = re.compile('<font class="skcolor_ljg">(.*?)</font>')
+    match2 = pt2.findall(html)
+    if(len(match2)==0):
+        return(rlt)
+    match2_counter = Counter(match2)
+    match2_set = list(set(match2))
+    match2_count = []
+    for seti in match2_set:
+        match2_count.append(match2_counter[seti]/len(match2))
+    match2_cumsum = sorted(match2_count,reverse=True)
+    thres = 0
+    if(match2_cumsum[0]>0.5):
         thres = 0
-        if(match2_cumsum[0]>0.5):
-            thres = 0
-        else:
-            for i in range(1,len(match2_cumsum)):
-                thres = thres+1
-                match2_cumsum[i] = match2_cumsum[i] + match2_cumsum[i-1]
-                if(match2_cumsum[i]>0.5):
-                    break
-        thres = sorted(match2_count,reverse=True)[thres]
-        prod = ''
-        for i in range(0,len(match2_set)):
-            if(match2_count[i]>=thres):
-                prod = prod + match2_set[i]
-        if(loopi==loopmax):
-            prod = ''.join([i for i in prod if not i.isdigit()])
-        prod = quote(prod)
-        url='http://search.jd.com/Search?keyword='+prod+'&enc=utf-8'
-        html = gethtml(url);
-        rlt = jdcat_inloop(html)
+    else:
+        for i in range(1,len(match2_cumsum)):
+            thres = thres+1
+            match2_cumsum[i] = match2_cumsum[i] + match2_cumsum[i-1]
+            if(match2_cumsum[i]>0.5):
+                break
+    thres = sorted(match2_count,reverse=True)[thres]
+    prod = ''
+    for i in range(0,len(match2_set)):
+        if(match2_count[i]>=thres):
+            prod = prod + match2_set[i]
+    prod = quote(prod)
+    url='http://search.jd.com/Search?keyword='+prod+'&enc=utf-8'
+    html = gethtml(url);
+    rlt = jdcat_inloop(html)
+    if(len(rlt)>0):
+        return(rlt)
+    #exclude digital characters
+    prod = ''
+    for i in range(0,len(match2_set)):
+        if(match2_count[i]>=thres):
+            prod = prod + match2_set[i]
+    prod = ''.join([i for i in prod if not i.isdigit()])
+    prod = quote(prod)
+    url='http://search.jd.com/Search?keyword='+prod+'&enc=utf-8'
+    html = gethtml(url);
+    rlt = jdcat_inloop(html)
     return(rlt)
 
 class MyHTMLParser(HTMLParser):
@@ -130,26 +140,26 @@ for i in range(len(sku)):
 
 f.close()
 
+f = open('temp.txt','w')
+
 rlt = []
 url = []
 for i in range(0,len(sku)):
     skui = sku[i]
     urli = 'http://search.jd.com/Search?keyword='+skui+'&enc=utf-8'
     rlti = jdcat_loop(skui)
-    print(i)
-    print(urli)
-    print(rlti)
     url.append(urli)
     rlt.append(rlti)
+    towrite = '%d'%i + ", " + skui + ", " + rlti
+    print('%d'%i + ", " + urli + ", " + rlti)
+    f.write(towrite)
 
-for i in range(0,len(rlt)):
-    print(url[i])
-    print(rlt[i])
+f.close()
 
 
 ##########################
 
-prod = sku[0]
+prod = sku[900]
 
 url='http://search.jd.com/Search?keyword='+prod+'&enc=utf-8'
 html = gethtml(url);
@@ -163,9 +173,15 @@ if(match):
     parser2.feed(match.group(1))
 
 rlt = parser2.getContent()
-#inploop
+if(len(rlt)>0):
+    return(rlt)
+
+print('track similar product')
 pt2 = re.compile('<font class="skcolor_ljg">(.*?)</font>')
 match2 = pt2.findall(html)
+if(len(match2)==0):
+    return(rlt)
+
 match2_counter = Counter(match2)
 match2_set = list(set(match2))
 match2_count = []
@@ -189,9 +205,20 @@ for i in range(0,len(match2_set)):
     if(match2_count[i]>=thres):
         prod = prod + match2_set[i]
 
-prod_bk = prod
 prod = quote(prod)
 url='http://search.jd.com/Search?keyword='+prod+'&enc=utf-8'
 html = gethtml(url);
 rlt = jdcat_inloop(html)
+if(len(rlt)>0):
+    return(rlt)
 
+for i in range(0,len(match2_set)):
+    if(match2_count[i]>=thres):
+        prod = prod + match2_set[i]
+
+prod = ''.join([i for i in prod if not i.isdigit()])
+prod = quote(prod)
+url='http://search.jd.com/Search?keyword='+prod+'&enc=utf-8'
+html = gethtml(url);
+rlt = jdcat_inloop(html)
+rlt
