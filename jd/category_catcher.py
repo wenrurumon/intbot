@@ -145,7 +145,7 @@ f = open('temp.txt','w')
 
 rlt = []
 url = []
-for i in range(0,len(sku)):
+for i in range(2000,len(sku)):
     skui = sku[i]
     urli = 'http://search.jd.com/Search?keyword='+skui+'&enc=utf-8'
     rlti = jdcat_loop(skui)
