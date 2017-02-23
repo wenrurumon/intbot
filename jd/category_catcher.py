@@ -99,6 +99,7 @@ def jdcat_loop(prod,loopmax=3):
     if(len(rlt)>0):
         return(rlt)
     #exclude digital characters
+    print('track digital characters excluded')
     prod = ''
     for i in range(0,len(match2_set)):
         if(match2_count[i]>=thres):
