@@ -34,4 +34,4 @@ getdouban <- function(year){
   return(movie.info)
 }
 
-system.time(x <- getdouban(3516235))
+system.time(x <- lapply(c(867233,836808,3516235),getdouban))
