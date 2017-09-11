@@ -35,3 +35,5 @@ getdouban <- function(year){
 }
 
 system.time(x <- lapply(c(867233,836808,3516235),getdouban))
+
+
