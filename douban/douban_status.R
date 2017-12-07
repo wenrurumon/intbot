@@ -1,7 +1,4 @@
-
 rm(list=ls())
-
-#Functions
 geteletext <- function(...){
   x <- do.call(c,list(...))
   sapply(x,function(x){
@@ -19,62 +16,65 @@ geteleattr <- function(...,attr,ifunlist=F){
     return(x)
   }
 }
-'
-navigate
-findElement
-sendKeysToActiveElement
-getCurrentUrl
-'
 
 #Setup
 library(RSelenium)
 chrome <- remoteDriver(remoteServerAddr = "localhost" 
-                      , port = 4444L
-                      , browserName = "chrome")
+                       , port = 4444L
+                       , browserName = "chrome")
 
 #Get Browser
-  chrome$open()
+chrome$open()
 
-#Login Douban
-  url <- 'http://www.douban.com'
-  #username <- 
-  #passwd <- 
-  chrome$navigate(url)
-  chrome$findElement('xpath','//*[@id="form_email"]')
-  chrome$sendKeysToActiveElement(list(key='tab'))
-  chrome$sendKeysToActiveElement(list(username,key='tab',passwd))
-  chrome$sendKeysToActiveElement(key='enter')
-
-#check reminder
-  reminder <- chrome$findElements('class','lnk-remind')
-  doumail <- chrome$findElements('id','top-nav-doumail-link')
-  # sapply(doumail,function(x){x$getElementText()})
-  geteletext(doumail,reminder)
-  # sapply(doumail, function(x) x$getElementAttribute("href"))
-  geteleattr(doumail,reminder,attr='href')
-  url <- geteleattr(doumail,attr='href',ifunlist=T)
-  chrome$navigate(url)
+###########################
 
 #check guangbo
-  url <- 'https://www.douban.com/mine/'
-  chrome$navigate(url)
-  url <- unlist(chrome$getCurrentUrl())
-  
-  getguangbo <- function(i){
-    print(i)
-    urli <- paste0(url,'statuses?p=',i)
-    chrome$navigate(urli)
-    items <- chrome$findElements('class','stream-items')
-    items <- unlist(geteletext(items))
-    items <- strsplit(items,'\n')[[1]]
-    end <- grep('   删除',items)
-    start <- c(1,end[-length(end)]+1)
-    lapply(1:length(end),function(j){
-      items[start[j]:end[j]]
-    })
-  }
-  
-  myguangbo <- lapply(1:5,getguangbo)
-  
+# url <- 'https://www.douban.com/mine/'
+# chrome$navigate(url)
+# url <- unlist(chrome$getCurrentUrl())
 
-    
+url_base <- 'https://www.douban.com/people/'
+id <- 64077663
+url <- paste0(url_base,id,'/')
+
+getguangbo <- function(i){
+  print(i)
+  urli <- paste0(url,'statuses?p=',i)
+  chrome$navigate(urli)
+  items <- chrome$findElements('class','stream-items')
+  items <- unlist(geteletext(items))
+  items <- strsplit(items,'\n')[[1]]
+  items
+}
+myguangbo <- do.call(c,lapply(1:3,getguangbo))
+myguangbo <- sapply(strsplit(myguangbo,' '),function(x){x[[1]]})
+id <- names(sort(-table(myguangbo)))[1]
+
+getguangbo2 <- function(i){
+  print(i)
+  urli <- paste0(url,'statuses?p=',i)
+  chrome$navigate(urli)
+  items <- chrome$findElements('class','stream-items')
+  items <- unlist(geteletext(items))
+  items <- strsplit(items,'\n')[[1]]
+  start <- which(substr(items,1,nchar(id)+1) == paste0(id,' '))
+  end <- c(start[-1]-1,length(items))
+  lapply(1:length(start),function(j){
+    items[start[j]:end[j]]
+  })
+}
+
+n <- 9
+myguangbo <- lapply(1:n,getguangbo2)
+myguangbo <- do.call(c,myguangbo)
+# save(myguangbo,file='myguangbo.rda')
+# load('myguangbo.rda')
+myguangbo <- lapply(myguangbo,function(x){
+  x <- gsub('  ',' ',x)
+})
+
+h <- substr(sapply(myguangbo,function(x){x[[1]]}),1,nchar(id)+3)
+myguangbo <- lapply(unique(h),function(x){
+  myguangbo[h==x]
+})
+myguangbo[grep('看',unique(h))]
