@@ -29,12 +29,14 @@ chrome$open()
 ###########################
 
 #check guangbo
+1``
 # url <- 'https://www.douban.com/mine/'
 # chrome$navigate(url)
 # url <- unlist(chrome$getCurrentUrl())
 
 url_base <- 'https://movie.douban.com/people/'
-id <- 71066593
+# id <- 71066593
+id <- 'count.pink'
 url <- paste0(url_base,id,'/')
 labs <- c('collect','wish','do')
 
