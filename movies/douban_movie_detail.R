@@ -39,11 +39,11 @@ get_movie_url <- function(keyword){
   input$sendKeysToElement(list(keyword,key='enter'))
   #Get subject slide
   subs <- chrome$findElements('tag name','a')
-  subs_name <- unlist(geteletext(chrome$findElement('class','title-text')))
-  subs <- subs[unlist(geteletext(subs))%in%subs_name]
+  subhref <- unlist(geteleattr(subs,attr='href'))
+  subs <- subs[grep('/subject/',subhref)]
   subtext <- unlist(geteletext(subs))
   subhref <- unlist(geteleattr(subs,attr='href'))
-  subs <- cbind(subtext,subhref)[grepl('subject/',subhref)&nchar(subtext)>0,,drop=F]
+  subs <- cbind(subtext,subhref)[nchar(subtext)>0,,drop=F]
   #the Subject
   url <- subs[1,2]
   list(url=url,candidate=subs)
@@ -233,6 +233,11 @@ movies <- unlist(strsplit(gsub('  ','',movies),'\n'))
 
 rlt <- list()
 for(i in 1:length(movies)){
+  rlt[[i]] <- model2(movies[i])
+  names(rlt)[i] <- rlt[[i]]$name
+}
+
+for(i in length(rlt):length(movies)){
   rlt[[i]] <- model2(movies[i])
   names(rlt)[i] <- rlt[[i]]$name
 }
