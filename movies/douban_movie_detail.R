@@ -88,7 +88,7 @@ get_movie_info <- function(url){
 model <- function(x){
   url <- get_movie_url(x)
   out <- get_movie_info(url$url)
-  print(url)
+  print(out$name)
   out
 }
 
