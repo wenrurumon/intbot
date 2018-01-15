@@ -52,6 +52,7 @@ get_movie_url <- function(keyword){
 get_movie_info <- function(url){
   chrome$navigate(url)
   print('navigate url for movie')
+  name <- geteletext(chrome$findElement('xpath','//*[@id="content"]/h1'))[[1]]
   info <- strsplit(geteletext(chrome$findElement('id','info'))[[1]],'\n')
   intro <- geteletext(chrome$findElement('id','link-report'))[[1]]
   #short comments
@@ -80,7 +81,7 @@ get_movie_info <- function(url){
     try(geteletext(chrome$findElement('id','link-report'))[[1]])
   })
   #output
-  rlt <- list(url=url,info=info,intro=intro,shortcomment=cmts,longcomment=lcmts)
+  rlt <- list(name=name,url=url,info=info,intro=intro,shortcomment=cmts,longcomment=lcmts)
   rlt
 }
 
@@ -96,39 +97,42 @@ model2 <- function(x){try(model(x))}
 #########################
 # Test
 #########################
+movies <- 
+  '迷雾
+  寂静岭
+  孤儿怨
+  第六感
+  闪灵
+  妖猫传
+  芳华
+  大护法
+  鲛珠传
+  看不见的客人
+  喜剧之王
+  楚门的世界
+  一天
+  火星救援
+  天使爱美丽
+  朗读者
+  后会无期
+  了不起的盖茨比
+  岁月神偷
+  模仿游戏
+  唐山大地震
+  卡萨布兰卡
+  阳光小美女
+  催眠大师
+  比利林恩的中场战事
+  海边的曼彻斯特
+  无人知晓
+  请以你的名字呼唤我
+  辩护人
+  假如爱有天意
+  '
+movies <- unlist(strsplit(gsub('  ','',movies),'\n'))[1:3]
 
-movies <- unlist(strsplit(
-'迷雾
-寂静岭
-孤儿怨
-第六感
-闪灵
-妖猫传
-芳华
-大护法
-鲛珠传
-看不见的客人
-喜剧之王
-楚门的世界
-一天
-火星救援
-天使爱美丽
-朗读者
-后会无期
-了不起的盖茨比
-岁月神偷
-模仿游戏
-唐山大地震
-卡萨布兰卡
-阳光小美女
-催眠大师
-比利林恩的中场战事
-海边的曼彻斯特
-无人知晓
-请以你的名字呼唤我
-辩护人
-假如爱有天意
-'
-  ,'\n'
-))
-out <- lapply(movies,model)
+rlt <- list()
+for(i in 1:length(movies)){
+  rlt[[i]] <- model2(movies[i])
+  names(rlt)[i] <- movies[i]
+}
