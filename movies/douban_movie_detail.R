@@ -134,5 +134,5 @@ movies <- unlist(strsplit(gsub('  ','',movies),'\n'))[1:3]
 rlt <- list()
 for(i in 1:length(movies)){
   rlt[[i]] <- model2(movies[i])
-  names(rlt)[i] <- movies[i]
+  names(rlt)[i] <- rlt[[i]]$name
 }
